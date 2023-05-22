@@ -39,6 +39,24 @@ import { RouterLink } from 'vue-router';
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
 </script>
 
+<script lang="ts">
+export default {
+    mounted() {
+        fetch(`http://127.0.0.1:8000/api/notes`)
+        .then(response => response.json())
+        .then(json => {
+        console.log(json);
+        this.AllNote = json;
+        });
+    },
+    data() {
+        return {
+            AllNote: [],
+        };
+    }
+}
+</script>
+
 <style>
 .allNote{
   display: flex;
