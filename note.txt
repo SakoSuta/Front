@@ -123,3 +123,183 @@ export default {
   height: 16px;
 }
 </style>
+
+<template>
+  <ion-page>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>
+          <div class="TitleNote">
+            <router-link to="/tabs/tab1" class="linguini">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path fill="#DDAC00" d="M9.78 12.78a.75.75 0 0 1-1.06 0L4.47 8.53a.75.75 0 0 1 0-1.06l4.25-4.25a.751.751 0 0 1 1.042.018a.751.751 0 0 1 .018 1.042L6.06 8l3.72 3.72a.75.75 0 0 1 0 1.06Z"/></svg>
+              <span>Back Home</span>
+            </router-link>
+          </div>
+        </ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content :fullscreen="true">
+      <ion-header collapse="condense">
+        <ion-toolbar>
+          <ion-title size="large">
+            <div class="TitleNote">
+              <router-link to="/tabs/tab1" class="linguini">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path fill="#DDAC00" d="M9.78 12.78a.75.75 0 0 1-1.06 0L4.47 8.53a.75.75 0 0 1 0-1.06l4.25-4.25a.751.751 0 0 1 1.042.018a.751.751 0 0 1 .018 1.042L6.06 8l3.72 3.72a.75.75 0 0 1 0 1.06Z"/></svg>
+                <span>Back Home</span>
+              </router-link>
+            </div>
+          </ion-title>
+        </ion-toolbar>
+      </ion-header>
+
+      <div v-if="UserNoteVerify" style="height: 100%;">
+        <form @submit="saveNote" class="TheDeathNote">
+          <input type="text" v-model="NoteUp.title" placeholder="Title" required>
+          <textarea v-model="NoteUp.content" placeholder="Content" required></textarea>
+          <button type="submit">Save</button>
+        </form>
+      </div>
+
+    </ion-content>
+  </ion-page>
+</template>
+
+<script setup lang="ts">
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
+import { Router } from 'vue-router';
+</script>
+
+<script lang="ts">
+export default {
+  mounted() {
+    const token = localStorage.getItem('token');
+    const noteId = this.$route.params.id;
+
+    fetch(`http://127.0.0.1:8000/api/notes/${noteId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    })
+      .then(response => response.json())
+      .then(json => {
+        this.Note = json.Result;
+
+        fetch('http://127.0.0.1:8000/api/auth/user', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        })
+          .then(response => response.json())
+          .then(json => {
+            console.log(json.data);
+            console.log(this.Note.user_id);
+            if (json.data.id === this.Note.user_id) {
+              this.UserNoteVerify = true;
+            }
+            this.User = json.data;
+          });
+      });
+  },
+  data() {
+    return {
+      User: [],
+      Note: {},
+      NoteUp: {
+        title: '',
+        content: '',
+      },
+      UserNoteVerify: false,
+    };
+  },
+  methods: {
+    saveNote() {
+      const token = localStorage.getItem('token');
+      const noteId = this.$route.params.id;
+
+      fetch(`http://127.0.0.1:8000/api/notes/${noteId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(this.NoteUp),
+      })
+        .then(response => response.json())
+        .then(json => {
+          // Gérer la réponse de la requête ici
+          console.log(json);
+          this.$router.push('/tabs/tab1');
+        });
+    },
+  },
+};
+</script>
+
+<style>
+.TitleNote {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.linguini {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+.linguini span {
+  margin-left: 5px;
+}
+
+.TheDeathNote {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  padding: 20px 30px;
+  height: 100%;
+}
+
+.TheDeathNote input {
+  font-size: 28px;
+  font-weight: bold;
+  margin: 20px 0px;
+  border: none;
+  background-color: rgba(0, 0, 0, 0);
+}
+
+.TheDeathNote textarea {
+  font-size: 16px;
+  margin: 10px 0px;
+  border: none;
+  background-color: rgba(0, 0, 0, 0);
+  height: 100%;
+  resize: none;
+}
+
+.TheDeathNote button {
+  margin: 20px 0px;
+  padding: 10px 20px;
+  border: none;
+  background-color: #DDAC00;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 5px;
+}
+
+.TheDeathNote input:focus {
+  outline: none;
+}
+
+.TheDeathNote textarea:focus {
+  outline: none;
+}
+
+ion-title {
+  padding: 10px;
+}
+</style>

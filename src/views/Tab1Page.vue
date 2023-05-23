@@ -13,7 +13,7 @@
       </ion-header>
       <div class="allNote">
         <div class="ContentAllNote">
-          <router-link to="/tabs/tab2" class="OneNote" v-for="note in AllNote">
+          <router-link :to="'/tabs/tab2/' + note.id" class="OneNote" v-for="note in AllNote">
             <h2>{{ note.title }}</h2>
             <p>{{ note.updated_at }}</p>
             <span>
