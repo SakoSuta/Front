@@ -107,12 +107,12 @@ export default {
         const passwordValue = formData.get('password');
 
         console.log('Données envoyées :', {
-          name: nameValue,
+            name: nameValue,
           email: emailValue,
           password: passwordValue,
         });
 
-        const response = fetch('http://127.0.0.1:8000/api/auth/register', {
+        const response = await fetch('http://127.0.0.1:8000/api/auth/register', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -123,19 +123,18 @@ export default {
             password: passwordValue,
           }),
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           const token = data.token;
           localStorage.setItem('token', token);
           this.$router.push('/tabs/tab1');
         }
-  }catch (error) {
+      } catch (error) {
         console.error('An error occurred', error);
       }
-    },
   },
-};
+}};
   </script>
 
 <style>
