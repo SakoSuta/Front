@@ -73,11 +73,7 @@ export default {
         if (response.ok) {
           const data = await response.json();
           const token = data.token;
-
-          // Store the token in localStorage
           localStorage.setItem('token', token);
-
-          // Redirect to the desired page
           this.$router.push('/tabs/tab3');
         }
       } catch (error) {

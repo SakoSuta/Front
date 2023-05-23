@@ -49,19 +49,17 @@ router.beforeEach((to, from, next) => {
   const isAuthenticated = localStorage.getItem('token') !== null;
 
   if (to.matched.some(record => record.meta.requiresAuth)) {
-    // Vérifie si la route nécessite une authentification
     if (!isAuthenticated) {
-      // Redirige vers la page de login si l'utilisateur n'est pas authentifié
       if (to.path !== '/tabs/tab4') {
         next('/tabs/tab4');
       } else {
-        next(); // Évite la redirection infinie
+        next();
       }
     } else {
-      next(); // Poursuit la navigation si l'utilisateur est authentifié
+      next();
     }
   } else {
-    next(); // Poursuit la navigation pour les routes qui ne nécessitent pas d'authentification
+    next();
   }
 });
 

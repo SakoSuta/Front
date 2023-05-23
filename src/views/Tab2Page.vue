@@ -33,6 +33,13 @@
           <button @click="DeleteNote" class="DeleteButton">Delete</button>
         </form>
       </div>
+      <div v-else-if="isNewNote" style="height: 90%;">
+        <form action="" class="TheDeathNote" @submit="CreateNote">
+          <input type="text" name="title" v-model="NewNote.title" placeholder="Title" required>
+          <textarea name="content" v-model="NewNote.content" placeholder="Content" required></textarea>
+          <button type="submit" class="TheDeathNotebutton">Save</button>
+        </form>
+      </div>
       <div v-else style="height: 90%;">
         <div class="NotURNote">
           <div class="ContentNote">
@@ -40,8 +47,8 @@
             <p>{{ Note.content }}</p>
           </div>
         <div class="UserNote">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path fill="#909094" d="M10.561 8.073a6.005 6.005 0 0 1 3.432 5.142a.75.75 0 1 1-1.498.07a4.5 4.5 0 0 0-8.99 0a.75.75 0 0 1-1.498-.07a6.004 6.004 0 0 1 3.431-5.142a3.999 3.999 0 1 1 5.123 0ZM10.5 5a2.5 2.5 0 1 0-5 0a2.5 2.5 0 0 0 5 0Z"/></svg>
-            {{ User.name }}
+            <svg style="margin-right: 3px;" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path fill="#909094" d="M10.561 8.073a6.005 6.005 0 0 1 3.432 5.142a.75.75 0 1 1-1.498.07a4.5 4.5 0 0 0-8.99 0a.75.75 0 0 1-1.498-.07a6.004 6.004 0 0 1 3.431-5.142a3.999 3.999 0 1 1 5.123 0ZM10.5 5a2.5 2.5 0 1 0-5 0a2.5 2.5 0 0 0 5 0Z"/></svg>
+            {{ Note.user_name }}
           </div>
         </div>
       </div>
@@ -59,6 +66,12 @@ import { Router } from 'vue-router';
 export default {
   mounted() {
     const token = localStorage.getItem('token');
+
+    const id = this.$route.params.id;
+
+    if (id === "new") {
+      this.isNewNote = true;
+    }
 
     fetch(`http://127.0.0.1:8000/api/notes/${this.$route.params.id}`, {
       method: 'GET',
@@ -78,8 +91,6 @@ export default {
     })
     .then(response => response.json())
     .then(json => {
-      console.log(json.data);
-      console.log(this.Note.user_id);
       if(json.data.id === this.Note.user_id){
          this.UserNoteVerify = true;
       }
@@ -95,6 +106,11 @@ export default {
         content: '',
       },
       UserNoteVerify: false,
+      isNewNote: false,
+      NewNote: {
+        title: '',
+        content: '',
+      },
     };
   },
   methods: {
@@ -113,7 +129,6 @@ export default {
       })
         .then(response => response.json())
         .then(json => {
-          // Gérer la réponse de la requête ici
           console.log(json);
           this.$router.push('/tabs/tab1');
         });
@@ -123,13 +138,34 @@ export default {
       const noteId = this.$route.params.id;
 
       fetch(`http://127.0.0.1:8000/api/notes/${noteId}`,
-      { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } })
+      { method: 'DELETE', 
+      headers: { 
+          'Authorization': `Bearer ${token}` } })
         .then(response => response.json())
         .then(json => {
           console.log(json);
           this.$router.push('/tabs/tab1');
         });
-  }},
+  },
+  CreateNote(Event: Event) {
+    Event.preventDefault();
+    const token = localStorage.getItem('token');
+      console.log(this.NewNote);
+
+    fetch(`http://127.0.0.1:8000/api/notes`,
+    { method: 'POST', 
+    headers: { 
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json' },
+        body: JSON.stringify(this.NewNote), })
+      .then(response => response.json())
+      .then(json => {
+        console.log(json);
+        this.NewNote.title = '';
+        this.NewNote.content = ''; 
+        this.$router.push('/tabs/tab1');
+      });
+}},
 };
 </script>
 
