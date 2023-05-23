@@ -28,7 +28,7 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/Tab3Page.vue')
       },
       {
-        path: 'tab4',
+        path: 'tab4/:slug',
         component: () => import('@/views/Tab4Page.vue')
       },
       {
@@ -50,8 +50,8 @@ router.beforeEach((to, from, next) => {
 
   if (to.matched.some(record => record.meta.requiresAuth)) {
     if (!isAuthenticated) {
-      if (to.path !== '/tabs/tab4') {
-        next('/tabs/tab4');
+      if (to.path !== '/tabs/tab4/login' && to.path !== '/tabs/tab4/new') {
+        next('/tabs/tab4/login');
       } else {
         next();
       }

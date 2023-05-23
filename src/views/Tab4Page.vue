@@ -11,38 +11,55 @@
             <ion-title size="large">Login</ion-title>
           </ion-toolbar>
         </ion-header>
-        <div class="allNote">
-          <div class="ContentAllNote">
-            <router-link to="/tabs/tab3" class="OneNote">
-              <h2>Ma premiere note</h2>
-              <p>05/05/05</p>
-              <span>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path fill="#909094" d="M10.561 8.073a6.005 6.005 0 0 1 3.432 5.142a.75.75 0 1 1-1.498.07a4.5 4.5 0 0 0-8.99 0a.75.75 0 0 1-1.498-.07a6.004 6.004 0 0 1 3.431-5.142a3.999 3.999 0 1 1 5.123 0ZM10.5 5a2.5 2.5 0 1 0-5 0a2.5 2.5 0 0 0 5 0Z"/></svg>
-                User</span>
-            </router-link>
-            <form @submit="handleLogin">
-                <input type="email" name="email" v-model="email" placeholder="Email" required>
-                <input type="password" name="password" v-model="password" placeholder="Password" required>
-                <button type="submit">Login</button>
-            </form>
-          </div>
-        </div>
+            <div v-if="isNewUser" class="Login">
+                <div class="LoginContent">
+                    <form @submit="handleRegiter">
+                        <input type="text" name="name" v-model="name" placeholder="Name" required>
+                        <input type="email" name="email" v-model="email" placeholder="Email" required>
+                        <input type="password" name="password" v-model="password" placeholder="Password" required>
+                        <button type="submit" class="LogButton">Regiter</button>
+                        <router-link to="/tabs/tab4/login">Have an account ?</router-link>
+                    </form>
+                </div>
+            </div>
+            <div v-else class="Login">
+                <div class="LoginContent">
+                    <form @submit="handleLogin">
+                        <input type="email" name="email" v-model="email" placeholder="Email" required>
+                        <input type="password" name="password" v-model="password" placeholder="Password" required>
+                        <button type="submit" class="LogButton">Login</button>
+                        <router-link to="/tabs/tab4/new">You don't have an account ?</router-link>
+                    </form>
+                </div>
+            </div>
       </ion-content>
     </ion-page>
   </template>
   
   <script setup lang="ts">
   import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/vue';
+  import { RouterLink } from 'vue-router';
   </script>
 
   <script lang="ts">
   import { ref } from 'vue';
 
 export default {
+    mounted() {
+        const token = localStorage.getItem('token');
+
+        const slug = this.$route.params.slug;
+
+        if (slug === "new") {
+          this.isNewUser = true;
+        }
+    },
   data() {
     return {
+      name: '',
       email: '',
       password: '',
+      isNewUser: false,
     };
   },
   methods: {
@@ -74,9 +91,46 @@ export default {
           const data = await response.json();
           const token = data.token;
           localStorage.setItem('token', token);
-          this.$router.push('/tabs/tab3');
+          this.$router.push('/tabs/tab1');
         }
       } catch (error) {
+        console.error('An error occurred', error);
+      }
+    },
+    async handleRegiter(event: Event) {
+      event.preventDefault();
+
+      try {
+        const formData = new FormData(event.target as HTMLFormElement);
+        const nameValue = formData.get('name');
+        const emailValue = formData.get('email');
+        const passwordValue = formData.get('password');
+
+        console.log('Données envoyées :', {
+          name: nameValue,
+          email: emailValue,
+          password: passwordValue,
+        });
+
+        const response = fetch('http://127.0.0.1:8000/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: nameValue,
+            email: emailValue,
+            password: passwordValue,
+          }),
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          const token = data.token;
+          localStorage.setItem('token', token);
+          this.$router.push('/tabs/tab1');
+        }
+  }catch (error) {
         console.error('An error occurred', error);
       }
     },
@@ -85,58 +139,52 @@ export default {
   </script>
 
 <style>
-.allNote{
-  display: flex;
-  justify-content: center;
-  margin: 20px 0px;
-}
-.ContentAllNote{
-  background-color: #1C1C1E;
-  padding: 0px 30px;
-  width: 89%;
-  height: fit-content;
-  border-radius: 8px;
-}
-.OneNote{
-  background-color: #1C1C1E;
-  display: flex;
-  flex-direction: column;
-  padding: 14px 20px 14px 0px;
-  padding-bottom: 20px;
-  border-bottom: rgba(144, 144, 148,0.1) solid 1px;
-  text-decoration: none;
+.Login{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.OneNote h2{
-  color: #fff;
-  font-size: 17px;
-  margin: 0px;
-  height: 21px;
-  display: flex;
-  align-items: center;
+.LoginContent{
+    width: 80%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-.OneNote p{
-  color: #909094;
-  font-size: 15px;
-  margin: 0px;
-  height: 21px;
-  display: flex;
-  align-items: center;
+.LoginContent form{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 }
 
-.OneNote span{
-  color: #909094;
-  font-size: 15px;
-  margin: 0px;
-  height: 21px;
-  display: flex;
-  align-items: center;
+.LoginContent form input{
+    width: 100%;
+    height: 40px;
+    margin: 10px 0px;
+    padding: 0px 10px;
+    border-radius: 8px;
+    border: none;
+    background-color: #1C1C1E;
+    color: white;
+    font-size: 16px;
 }
 
-.OneNote span svg{
-  margin-right: 4px;
-  width: 16px;
-  height: 16px;
+.LoginContent form button{
+    width: 100%;
+    height: 40px;
+    margin: 10px 0px;
+    padding: 0px 10px;
+    border-radius: 8px;
+    border: none;
+    background-color: #ddac00;
+    color: white;
+    font-size: 16px;
 }
 </style>
